@@ -4,11 +4,12 @@ import {BrowserRouter as Router, Route ,Link,Redirect} from "react-router-dom"
 //导入home组件
 import Home from './pages/home'
 import Citylist from './pages/citylist'
+import Map from './pages/map'
 export default class App extends React.Component{
 
   render(){
     return<Router>
-        <div>
+        <div className="content">
           <Route 
           exact 
           path="/" 
@@ -18,6 +19,7 @@ export default class App extends React.Component{
           />
           <Route path='/home' component={Home}></Route>
           <Route path='/citylist' component={Citylist}></Route>
+          <Route path='/map' component={Map}></Route>
         </div>
     </Router>
   }

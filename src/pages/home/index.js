@@ -10,7 +10,7 @@ import Index from '../index'
 import Houselist from '../houselist'
 import News from '../news'
 import Profile from '../profile'
-//1 抽象TabBar菜单的数据
+// 抽象TabBar菜单的数据
 const tabItems = [
   {
     title: '首页',
