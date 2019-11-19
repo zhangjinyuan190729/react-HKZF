@@ -9,7 +9,6 @@ export default class App extends React.Component{
 
   render(){
     return<Router>
-        <div className="content">
           <Route 
           exact 
           path="/" 
@@ -20,7 +19,6 @@ export default class App extends React.Component{
           <Route path='/home' component={Home}></Route>
           <Route path='/citylist' component={Citylist}></Route>
           <Route path='/map' component={Map}></Route>
-        </div>
     </Router>
   }
 }

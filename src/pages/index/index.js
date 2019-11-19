@@ -36,7 +36,7 @@ export default class Index extends React.Component{
     }
 //获取IP定位
     getIdsite(){
-        var myCity = new window.BMap.LocalCity();
+        var myCity = new window.BMap.LocalCity()
         myCity.get(result=>{
             var cityName = result.name.substr(0,2)
             this.setState({
