@@ -1,0 +1,8 @@
+// 导航栏 固定到顶部
+.navbar{
+    background-color: #eee;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+  }

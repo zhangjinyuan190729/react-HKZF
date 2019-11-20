@@ -2,13 +2,15 @@ import React from 'react'
 //引入sass文件
 import './citylist.scss'
 //引入antd-mobile
-import { NavBar, Icon } from 'antd-mobile';
+import { NavBar, Icon , Toast } from 'antd-mobile';
 //导入 axios
 import Axios from "axios"
 //导入utli 的定位地址函数
 import { getCurrentCity } from "../../utils/index"
 //导入可视区域加载插件
 import { List , AutoSizer } from "react-virtualized"
+import NavHeader from "../../components/NavHeader"
+ let HAS_HOUSE =["北京","上海","广州","深圳"]
 export default class Citylist extends React.Component{
     state = {
         citylist:{},
@@ -17,7 +19,7 @@ export default class Citylist extends React.Component{
     componentDidMount(){
         this.getCityList()
     }
-
+  listRef = React.createRef()
 //获取城市列表
 async getCityList(){
     const res =await Axios.get("http://localhost:8080/area/city?level=1")
@@ -48,7 +50,7 @@ async getCityList(){
     }
 // 当滚动的时候 onRowsRendered 获取滚动到顶部的索引
 onRowsRendered=({ startIndex, stopIndex })=>{
-    console.log(startIndex,stopIndex) //startIndex 最顶部那个开始索引  stopIndex底部结束的索引
+    // console.log(startIndex,stopIndex) startIndex 最顶部那个开始索引  stopIndex底部结束的索引
     // 修改高亮的索引 就高亮了
     if(this.state.activeindex!=startIndex){ //优化一下 如果一直一样就没必要改 不一样改 效率高
         this.setState({
@@ -82,7 +84,16 @@ rowRenderer=({
                     <div className="title">{this.formatWord(word)}</div>
                     {/* 循环生成对应单词 的城市 */}
                     {citys.map((item)=>{
-                        return <div className="name" key={item.value} >{item.label}</div>
+                        return <div className="name" key={item.value} 
+                        onClick={()=>{
+                            if(HAS_HOUSE.indexOf(item.label) == -1){
+                                Toast.info("暂无房源")
+                            }else{
+                                localStorage.setItem('my-city',JSON.stringify(item))
+                                this.props.history.push('/home/index')
+                            }
+                        }}
+                        >{item.label}</div>
                     })}
             </div>
         );
@@ -103,16 +114,14 @@ formatWord=(word)=>{
 
         return(
             <div className='citylist'>
-            <NavBar
-            mode="light"
-            icon={<Icon type="left" />}
-            onLeftClick={() => this.props.history.go(-1)}
-            >城市列表</NavBar>
+                <NavHeader>城市列表</NavHeader>
             {/* 左侧城市列表 */}
             <AutoSizer>
             {/*height  width 这个组件AutoSizer会帮我们算出占满屏幕  */}
             {({height, width}) => (
                 <List
+                    scrollToAlignment="start"
+                    ref={this.listRef}
                     width={width} //列表宽
                     height={height}//列表高
                     rowCount={this.state.cityindex.length}//总数据条数
@@ -127,8 +136,12 @@ formatWord=(word)=>{
                  {/* 循环生成字母 */}
                  {this.state.cityindex.map((item,index)=>{
                      return <li
+                        onClick={()=>{
+                            this.listRef.current.scrollToRow(index)
+                        }}
                         className={this.state.activeindex==index?'index-active':''} 
-                        key={index}>
+                        key={index}
+                        >
 
                                 {item=='hot'?'热':item.toUpperCase()}
                                 

@@ -12,6 +12,8 @@ import nav3 from '../../assets/images/nav-3.png'
 import nav4 from '../../assets/images/nav-4.png'
 //flex 布局导入
 import { Flex ,WhiteSpace} from "antd-mobile"
+//导入utli 的定位地址函数
+import { getCurrentCity } from "../../utils/index"
 const menus = [
     { name: '整租', imgSrc: nav1, path: '/home/houselist' },
     { name: '合租', imgSrc: nav2, path: '/home/houselist' },
@@ -32,16 +34,14 @@ export default class Index extends React.Component{
         this.getSwiper()
         this.getGroups()
         this.getNews()
-        this.getIdsite()
+        this.getCurrentSite()
     }
-//获取IP定位
-    getIdsite(){
-        var myCity = new window.BMap.LocalCity()
-        myCity.get(result=>{
-            var cityName = result.name.substr(0,2)
-            this.setState({
-                cityname:cityName
-            })
+//获取当前定位
+   async getCurrentSite(){
+        let res = await getCurrentCity()
+        // console.log(res.label)
+        this.setState({
+            cityname:res.label
         })
     }
 //获取轮播图数据
