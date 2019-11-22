@@ -10,7 +10,7 @@ import { getCurrentCity } from "../../utils/index"
 //导入可视区域加载插件
 import { List , AutoSizer } from "react-virtualized"
 import NavHeader from "../../components/NavHeader"
- let HAS_HOUSE =["北京","上海","广州","深圳"]
+ let HAS_HOUSE =['北京','上海','广州','深圳']
 export default class Citylist extends React.Component{
     state = {
         citylist:{},

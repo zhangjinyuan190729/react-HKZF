@@ -6,6 +6,7 @@ import { Carousel,Grid } from "antd-mobile"
 // axios 导入
 import Axios from "axios"
 // 导入图片
+import { Request } from "../../utils/Request"
 import nav1 from '../../assets/images/nav-1.png'
 import nav2 from '../../assets/images/nav-2.png'
 import nav3 from '../../assets/images/nav-3.png'
@@ -46,7 +47,8 @@ export default class Index extends React.Component{
     }
 //获取轮播图数据
     async getSwiper () {
-        let res = await Axios.get("http://localhost:8080/home/swiper")
+        // let res = await Axios.get("http://localhost:8080/home/swiper")
+        let res = await Request.get("/home/swiper")
         this.setState({
             swiper:res.data.body
         },()=>{
