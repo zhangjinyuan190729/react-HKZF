@@ -22,7 +22,6 @@ export default class Map extends React.Component{
    async initMap(){
         this.map = new BMap.Map("container"); //map挂载全局
         let city = await getCurrentCity()
-        console.log(city)
             // 创建地址解析器实例     
         var myGeo = new BMap.Geocoder();      
         // 将地址解析结果显示在地图上，并调整地图视野    
@@ -79,8 +78,7 @@ export default class Map extends React.Component{
         //去圆点
             label.setStyle({border:"0px",padding:'0'})
             label.addEventListener('click',(e)=>{
-                let zoom = this.map.getZoom()
-                console.log(zoom)
+                let zoom = this.map.getZoom() //获取缩放值
                 if(zoom == 11){
                     setTimeout(() => {
                         this.map.clearOverlays()
@@ -95,9 +93,9 @@ export default class Map extends React.Component{
                     this.getCityData(value,"rect")
                 }else if(zoom == 15){
                     this.getCityList(value)
-                    console.log("这里要发送ajax 去获取街道小区的 房子列表")
+                    // console.log("这里要发送ajax 去获取街道小区的 房子列表")
                     // 点击的时候 的坐标
-                    console.log('e',e)
+                    // console.log('e',e)
                     let clickX=e.changedTouches[0].clientX 
                     let clickY=e.changedTouches[0].clientY 
                     // 中心点的y=(屏幕高度-房子列表高)/2
