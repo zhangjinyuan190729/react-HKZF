@@ -105,7 +105,7 @@ export default class FilterPicker extends Component {
         onChange={(val)=>{
           console.log(val)
           this.setState({
-            val:val
+            val
           })
         }}
         />
