@@ -44,16 +44,93 @@ export default class Filter extends Component {
   }
   //是否选中标题高亮函数
   onTitleClick=(type)=>{
+    let {titleSelectedStatus,selectedValues} = this.state
+    let newtitleSelectedStatus = {...titleSelectedStatus}
+    for( let key in newtitleSelectedStatus){
+        if(key == type){
+          newtitleSelectedStatus[key]=true
+          continue//跳出循环
+        }
+        let selectedVal = selectedValues[key]
+        if(key =="area"&&(selectedVal.length!==2 || selectedVal[0] !== 'area')){
+          newtitleSelectedStatus[key]=true
+        }else if(key == "mode"&&selectedVal[0] !== "null"){
+          newtitleSelectedStatus[key]=true
+        }else if(key == "price"&&selectedVal[0] !== "null"){
+          newtitleSelectedStatus[key]=true
+        }else if(key == "more"&&selectedVal.length !==0){
+          newtitleSelectedStatus[key]=true
+        }else{
+          newtitleSelectedStatus[key]=false
+        }
+    }
     this.setState({
+      titleSelectedStatus:newtitleSelectedStatus,
+      openType:type
+    })
+    /* 初始样式
+     this.setState({
       titleSelectedStatus:{
         ...titleSelectedStatus,//每一项展开
         [type]:true//[]表示对象里的变量
       },
       openType:type
     })
-
+    */
+   
   }
-  //渲染显示选择方式
+    // 取消函数
+  onCancel=(type)=>{
+    let {titleSelectedStatus,selectedValues} = this.state
+    let newtitleSelectedStatus = {...titleSelectedStatus}
+    
+        let selectedVal = selectedValues[type]
+        if(type =="area"&&(selectedVal.length!==2 || selectedVal[0] !== 'area')){
+          newtitleSelectedStatus[type]=true
+        }else if(type == "mode"&&selectedVal[0] !== "null"){
+          newtitleSelectedStatus[type]=true
+        }else if(type == "price"&&selectedVal[0] !== "null"){
+          newtitleSelectedStatus[type]=true
+        }else if(type == "more"&&selectedVal.length !==0){
+          newtitleSelectedStatus[type]=true
+        }else{
+          newtitleSelectedStatus[type]=false
+        }
+      this.setState({
+      titleSelectedStatus:newtitleSelectedStatus,
+        openType:""
+      })
+  }
+    //保存函数
+  onSave=(val,type)=>{
+    console.log('保存时选择数据',val)
+    let {titleSelectedStatus,selectedValues} = this.state
+  let newtitleSelectedStatus = {...titleSelectedStatus}
+  
+      let selectedVal = val
+      if(type =="area"&&(selectedVal.length!==2 || selectedVal[0] !== 'area')){
+        newtitleSelectedStatus[type]=true
+      }else if(type == "mode"&&selectedVal[0] !== "null"){
+        newtitleSelectedStatus[type]=true
+      }else if(type == "price"&&selectedVal[0] !== "null"){
+        newtitleSelectedStatus[type]=true
+      }else if(type == "more"&&selectedVal.length !==0){
+        newtitleSelectedStatus[type]=true
+      }else{
+        newtitleSelectedStatus[type]=false
+      }
+  
+  this.setState({
+    titleSelectedStatus:newtitleSelectedStatus,
+    selectedValues:{
+      ...this.state.selectedValues,
+      [type]:val
+    },
+    openType:""
+  })
+  }
+  // <---------------------------------------------------元素渲染--------------------------------------------------->
+  //显示筛选方式
   renderFilterPicker=()=>{
     let {openType ,selectedValues} = this.state
     if(openType=="area"||openType=="mode"||openType=="price"){
@@ -97,7 +174,7 @@ export default class Filter extends Component {
     }
     return null
   }
-  //判断遮罩是否显示
+  //显示遮罩
   renderMask=()=>{
     let {openType} = this.state
     if(openType=="area"||openType=="mode"||openType=="price"){
@@ -107,22 +184,19 @@ export default class Filter extends Component {
     }
     return null
   }
-  // 取消函数
-   onCancel=()=>{
-     this.setState({
-       openType:""
-     })
-   }
-   //保存函数
-   onSave=(val,type)=>{
-     console.log('保存时选择数据',val)
-    this.setState({
-      selectedValues:{
-        ...this.state.selectedValues,
-        [type]:val
-      },
-      openType:""
-    })
+  //显示侧栏筛选方式
+  renderMore=()=>{
+    let {characteristic, floor, oriented,roomType}=this.state.filterData
+    let data = {characteristic, floor, oriented,roomType}
+    let {openType} = this.state
+    if(openType=="more"){
+      return (
+        <FilterMore 
+        data={data}
+        />
+      )
+    }
+    return null
   }
   render() {
     return (
@@ -143,6 +217,7 @@ export default class Filter extends Component {
           {this.renderFilterPicker()}
           {/* 最后一个菜单对应的内容： */}
           {/* <FilterMore /> */}
+          {this.renderMore()}
         </div>
       </div>
     )
