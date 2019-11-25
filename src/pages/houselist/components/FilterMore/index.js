@@ -6,7 +6,7 @@ import styles from './index.module.css'
 
 export default class FilterMore extends Component {
   state={
-    selectedValues:[]
+    selectedValues:this.props.defaultvalue
   }
   onClick(id){
     let newValues =[...this.state.selectedValues]
@@ -27,10 +27,11 @@ export default class FilterMore extends Component {
     // 高亮类名： styles.tagActive
     return arr.map(item =>{
       // console.log(this)
+      let isSelected = this.state.selectedValues.indexOf(item.value)!=-1
         return(
           <span 
           key={item.value}
-          className={[styles.tag].join(' ')}
+          className={[styles.tag,isSelected? styles.tagActive:""].join(' ')}
           onClick={()=>{
             this.onClick(item.value)
           }}
@@ -45,7 +46,12 @@ export default class FilterMore extends Component {
     return (
       <div className={styles.root}>
         {/* 遮罩层 */}
-        <div className={styles.mask} />
+        <div 
+        className={styles.mask} 
+        onClick={()=>{
+          this.props.onCancel()//不传值默认事件对象even
+        }}
+        />
 
         {/* 条件内容 */}
         <div className={styles.tags}>
@@ -65,7 +71,19 @@ export default class FilterMore extends Component {
         </div>
 
         {/* 底部按钮 */}
-        <FilterFooter className={styles.footer} />
+        <FilterFooter 
+        onCancel={()=>{
+            this.setState({
+              selectedValues:[]
+            })
+          }
+        } 
+        onSave={()=>{
+          this.props.onSave(this.state.selectedValues,this.props.type)
+        }}
+        cancelText={"清空"}
+        className={styles.footer} 
+        />
       </div>
     )
   }

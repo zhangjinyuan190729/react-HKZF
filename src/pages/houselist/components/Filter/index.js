@@ -119,7 +119,7 @@ export default class Filter extends Component {
       }else{
         newtitleSelectedStatus[type]=false
       }
-  
+  console.log(23243)
   this.setState({
     titleSelectedStatus:newtitleSelectedStatus,
     selectedValues:{
@@ -127,6 +127,25 @@ export default class Filter extends Component {
       [type]:val
     },
     openType:""
+  },()=>{
+    let newsselectedValues={...this.state.selectedValues}
+    let area = newsselectedValues["area"][0]
+    let areaValue = 'null'
+    if(newtitleSelectedStatus['area'].length == 3){
+      areaValue =newsselectedValues["area"][2]!='null'?newsselectedValues["area"][2]:newsselectedValues["area"][1]
+    }
+    let mode =  newsselectedValues["mode"][0]
+    let price =  newsselectedValues["price"][0]
+    let more =  newsselectedValues["more"].join(",")
+    let filters={
+      [area]:areaValue,
+      mode,
+      price,
+      more
+    }
+    console.log("hahahah",filters)
+    console.log("hhah",this)
+    this.props.onFuilter(filters)
   })
   }
   // <---------------------------------------------------元素渲染--------------------------------------------------->
@@ -191,7 +210,11 @@ export default class Filter extends Component {
     let {openType} = this.state
     if(openType=="more"){
       return (
-        <FilterMore 
+        <FilterMore
+        onCancel={this.onCancel}
+        onSave={this.onSave}
+        defaultvalue={this.state.selectedValues.more}
+        type={this.state.openType} 
         data={data}
         />
       )
