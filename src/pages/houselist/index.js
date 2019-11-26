@@ -5,8 +5,10 @@ import Filter from "./components/Filter"
 import "./houselist.scss"
 import { getCurrentCity } from '../../utils/index'
 import {Request} from "../../utils/Request"
-import {List,AutoSizer} from "react-virtualized"
+import {List,AutoSizer,WindowScroller,InfiniteLoader} from "react-virtualized"
 import styles from "./houselist.module.css"
+import { resolve } from 'dns'
+import Sticky from './components/Sticky'
 export default class Houselist extends React.Component{
     state = {
         cityname :null,
@@ -14,15 +16,20 @@ export default class Houselist extends React.Component{
         list:[]  ,
         count:0
       }
+    fuilters={}//初始化参数
     async componentDidMount(){
         let res = await getCurrentCity()
         this.setState({
             cityname:res.label,
             cityId:res.value
+        },()=>{
+            this.gethouselist()
         })
+      
+       
     }
     onFuilter=(val)=>{
-        console.log(val)
+        // console.log(val)
         this.fuilters = val
         this.gethouselist()
     }
@@ -36,7 +43,7 @@ export default class Houselist extends React.Component{
             end:20
            }
         })
-        console.log("请求数据",res)
+        // console.log("请求数据",res)
         let { list , count } = res.data.body
         this.setState({
             list:list,
@@ -50,6 +57,12 @@ export default class Houselist extends React.Component{
         style, // Style object to be applied to row (to position it)
       })=> {
         let item = this.state.list[index]
+        if(!item){
+          return<div 
+            key={key} 
+            style={style}
+            >拼命加载中.....</div>
+        }
         return (
         <div 
         key={key} 
@@ -66,7 +79,10 @@ export default class Houselist extends React.Component{
                             {item.tags.map((item,index)=>{
                                         let color = `tag${index+1}`
                                     return (
-                                        <span className={[styles.tag,styles[color]].join(' ')} >
+                                        <span 
+                                        key={index}
+                                        className={[styles.tag,styles[color]].join(' ')}
+                                         >
                                         {item}
                                         </span>
                                     )
@@ -80,6 +96,30 @@ export default class Houselist extends React.Component{
         </div>
         );
       }
+    isRowLoaded=({index})=>{
+        // console.log(index)
+        return !!this.state.list[index]
+    }
+    //加载更多
+    loadMoreRows=({ startIndex , stopIndex })=>{
+        // console.log(startIndex,stopIndex)
+        return new Promise(()=>{
+          Request.get('/houses',{
+            params:{
+             cityId:this.state.cityId,
+             ...this.fuilters,
+             start:startIndex,
+             end:stopIndex
+            }
+         }).then(res=>{
+           console.log("加载更多",res)
+           this.setState({
+             list:[...this.state.list,...res.data.body.list]
+           })
+           resolve()
+         })
+        })
+    }
     render () {
 
         return (
@@ -97,22 +137,39 @@ export default class Houselist extends React.Component{
                     <SearchHeader>{this.state.cityname}</SearchHeader>
                 </div>
                 {/* 标题栏 */}
-                <Filter 
-                onFuilter={this.onFuilter}
-                >
-                </Filter>
+               <Sticky> 
+                 <Filter onFuilter={this.onFuilter}></Filter>
+               </Sticky>
                 {/* 房屋列表 */}
-                 <AutoSizer>
-                    {({height, width}) => (
-                    <List
-                    width={width}
-                    height={height}
-                    rowCount={this.state.count}
-                    rowHeight={120}
-                    rowRenderer={this.rowRenderer}
-                />
-                    )}
-                </AutoSizer>
+                        <InfiniteLoader
+                        isRowLoaded={this.isRowLoaded}
+                        loadMoreRows={this.loadMoreRows}
+                        rowCount={this.state.count}
+                        >
+                        {({onRowsRendered,registerChild})=>(
+                                <WindowScroller>
+                                    {({height, isScrolling, onChildScroll, scrollTop})=>(
+                                    <AutoSizer>
+                                        {({width}) => (
+                                                <List
+                                                isScrolling={isScrolling}
+                                                onScroll={onChildScroll}
+                                                scrollTop={scrollTop}
+                                                onRowsRendered={onRowsRendered}
+                                                ref={registerChild}//获取节点
+                                                autoHeight//自动调节高度
+                                                width={width}
+                                                height={height}
+                                                rowCount={this.state.count}//总条数
+                                                rowHeight={120}//每一行的高度
+                                                rowRenderer={this.rowRenderer}//列表每一项
+                                                />
+                                            )}
+                                    </AutoSizer>
+                                    )}
+                                </WindowScroller>
+                        )}
+                        </InfiniteLoader>
             </div>
         )
     }
