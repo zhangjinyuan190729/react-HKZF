@@ -9,12 +9,16 @@ import {List,AutoSizer,WindowScroller,InfiniteLoader} from "react-virtualized"
 import styles from "./houselist.module.css"
 import { resolve } from 'dns'
 import Sticky from './components/Sticky'
+import NoHouse from './components/NoHouse'
+import {Toast} from "antd-mobile"
+import {Spring} from "react-spring/renderprops"
 export default class Houselist extends React.Component{
     state = {
         cityname :null,
         cityId : null,
         list:[]  ,
-        count:0
+        count:0,
+        isloading:false//没有数据
       }
     fuilters={}//初始化参数
     async componentDidMount(){
@@ -24,17 +28,18 @@ export default class Houselist extends React.Component{
             cityId:res.value
         },()=>{
             this.gethouselist()
-        })
-      
-       
+        }) 
     }
+    //获取筛选数据
     onFuilter=(val)=>{
         // console.log(val)
+        window.scrollTo(0,0)
         this.fuilters = val
         this.gethouselist()
     }
     //获取满足条件的数据
     gethouselist= async ()=>{
+        Toast.loading("数据加载中...",0)
         let res= await Request.get('/houses',{
            params:{
             cityId:this.state.cityId,
@@ -43,12 +48,18 @@ export default class Houselist extends React.Component{
             end:20
            }
         })
+        Toast.hide()
         // console.log("请求数据",res)
         let { list , count } = res.data.body
+        if(count!==0){
+            Toast.info(`总共有${count}套房屋`,1,null,false)
+        }
         this.setState({
             list:list,
-            count:count
+            count:count,
+            isloading:true
         })
+        
     }
     //列表中每一项渲染
     rowRenderer=({
@@ -67,7 +78,11 @@ export default class Houselist extends React.Component{
         <div 
         key={key} 
         style={style}
-        className={styles.house}>
+        className={styles.house}
+        onClick={()=>{
+            this.props.history.push("/detail/"+item.houseCode)
+        }}
+        >
             <div className={styles.imgWrap}>
                 <img className={styles.img} src={`http://localhost:8080${item.houseImg}`} alt="" />
             </div>
@@ -112,13 +127,55 @@ export default class Houselist extends React.Component{
              end:stopIndex
             }
          }).then(res=>{
-           console.log("加载更多",res)
+        //    console.log("加载更多",res)
            this.setState({
              list:[...this.state.list,...res.data.body.list]
            })
            resolve()
          })
         })
+    }
+    //房屋列表
+    renderHouselist(){
+        if(this.state.isloading&&this.state.count==0){
+            // 无数据显示 
+            return(   
+             <NoHouse>暂无房源....</NoHouse>
+            )
+        }else{
+            //   有数据 房屋列表 
+            return(             
+            <InfiniteLoader
+            isRowLoaded={this.isRowLoaded}
+            loadMoreRows={this.loadMoreRows}
+            rowCount={this.state.count}
+            >
+            {({onRowsRendered,registerChild})=>(
+                    <WindowScroller>
+                        {({height, isScrolling, onChildScroll, scrollTop})=>(
+                        <AutoSizer>
+                            {({width}) => (
+                                    <List
+                                    isScrolling={isScrolling}
+                                    onScroll={onChildScroll}
+                                    scrollTop={scrollTop}
+                                    onRowsRendered={onRowsRendered}
+                                    ref={registerChild}//获取节点
+                                    autoHeight//自动调节高度
+                                    width={width}
+                                    height={height}
+                                    rowCount={this.state.count}//总条数
+                                    rowHeight={120}//每一行的高度
+                                    rowRenderer={this.rowRenderer}//列表每一项
+                                    />
+                                )}
+                        </AutoSizer>
+                        )}
+                    </WindowScroller>
+            )}
+            </InfiniteLoader>               
+            )
+        }
     }
     render () {
 
@@ -134,42 +191,24 @@ export default class Houselist extends React.Component{
                     }
                     >
                     </Icon>
-                    <SearchHeader>{this.state.cityname}</SearchHeader>
+                    <SearchHeader>
+                        {this.state.cityname}
+                    </SearchHeader>
                 </div>
                 {/* 标题栏 */}
-               <Sticky> 
-                 <Filter onFuilter={this.onFuilter}></Filter>
-               </Sticky>
-                {/* 房屋列表 */}
-                        <InfiniteLoader
-                        isRowLoaded={this.isRowLoaded}
-                        loadMoreRows={this.loadMoreRows}
-                        rowCount={this.state.count}
-                        >
-                        {({onRowsRendered,registerChild})=>(
-                                <WindowScroller>
-                                    {({height, isScrolling, onChildScroll, scrollTop})=>(
-                                    <AutoSizer>
-                                        {({width}) => (
-                                                <List
-                                                isScrolling={isScrolling}
-                                                onScroll={onChildScroll}
-                                                scrollTop={scrollTop}
-                                                onRowsRendered={onRowsRendered}
-                                                ref={registerChild}//获取节点
-                                                autoHeight//自动调节高度
-                                                width={width}
-                                                height={height}
-                                                rowCount={this.state.count}//总条数
-                                                rowHeight={120}//每一行的高度
-                                                rowRenderer={this.rowRenderer}//列表每一项
-                                                />
-                                            )}
-                                    </AutoSizer>
-                                    )}
-                                </WindowScroller>
-                        )}
-                        </InfiniteLoader>
+                <Spring
+                from={{ opacity: 0 }}
+                to={{ opacity: 1 }}>
+                {props => (
+                    <div style={props}>
+                        <Sticky height={40}> 
+                            <Filter onFuilter={this.onFuilter}></Filter>
+                        </Sticky>
+                    </div>
+                )}
+                </Spring>
+               
+                    {this.renderHouselist()}
             </div>
         )
     }

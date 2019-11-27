@@ -6,13 +6,13 @@ import { getCurrentCity } from "../../utils/index"
 import Axios from 'axios'
 import {Toast} from "antd-mobile"
 
-//定义变量
 let BMap = window.BMap
 export default class Map extends React.Component{
     state = {
         count:0,
         HouseList:[],
         isShowList:false
+        
     }
     componentDidMount(){
         this.initMap()

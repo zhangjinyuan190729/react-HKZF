@@ -36,19 +36,21 @@ const tabItems = [
 
 export default class Home extends React.Component{
     state = {
-      selectedTab: '/home/index',
+      selectedTab:this.props.location.pathname,
       hidden: false,
       fullScreen: false,
       }
       //tabbar 循环方法
     gettabbar(){
+      // console.log(this.props.location.pathname)
+      // console.log(this.state.selectedTab)
       return tabItems.map(item=>(
       <TabBar.Item
         icon={<i className={`iconfont ${item.icon}`}></i>}
         selectedIcon={<i className={`iconfont ${item.icon}`}></i>}
         title={item.title}
         key={item.title}
-        selected={this.state.selectedTab === item.path}
+        selected={this.props.location.pathname === item.path}//解决跳转bug
         onPress={() => {
           this.setState({
             selectedTab: item.path,
@@ -59,7 +61,7 @@ export default class Home extends React.Component{
       ))
     }
     render () {
-
+      // console.log(1111)
       return (
         <div className="home">
           <Route path="/home/index" component={Index}></Route>
