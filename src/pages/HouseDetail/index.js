@@ -10,6 +10,8 @@ import {BASE_URL as baseURL} from '../../utils/url'
 
 import styles from './index.module.css'
 
+import { Request } from '../../utils/Request'
+
 // 猜你喜欢
 const recommendHouses = [
   {
@@ -62,7 +64,7 @@ export default class HouseDetail extends Component {
 
     houseInfo: {
       // 房屋图片
-      slides: [],
+      houseImg: [],
       // 标题
       title: '',
       // 标签
@@ -97,19 +99,28 @@ export default class HouseDetail extends Component {
 
   componentDidMount() {
     console.log('房子ID', this.props.match.params.id)
-    this.renderMap('天山星城', {
-      latitude: '31.219228',
-      longitude: '121.391768'
-    })
+    this.getHouseDetail()
   }
-
+ async getHouseDetail(){
+      let res = await Request(`/houses/${this.props.match.params.id}`)
+      console.log(res.data.body.houseImg)
+      
+      this.setState({
+        houseInfo:res.data.body
+      },()=>{
+        this.renderMap(this.state.houseInfo.community, {
+          latitude: this.state.houseInfo.coord.latitude,
+          longitude: this.state.houseInfo.coord.longitude
+        })
+      })
+  }
   // 渲染轮播图结构
   renderSwipers() {
     const {
-      houseInfo: { slides }
+      houseInfo: { houseImg }
     } = this.state
 
-    return slides.map(item => (
+    return houseImg.map(item => (
       <a
         key={item.id}
         href="http://itcast.cn"
@@ -120,7 +131,7 @@ export default class HouseDetail extends Component {
         }}
       >
         <img
-          src={baseURL + item.imgSrc}
+          src={baseURL + item}
           alt=""
           style={{ width: '100%', verticalAlign: 'top' }}
         />
@@ -158,7 +169,7 @@ export default class HouseDetail extends Component {
           className={styles.navHeader}
           rightContent={[<i key="share" className="iconfont icon-share" />]}
         >
-          天山星城
+          {this.state.houseInfo.community}
         </NavHeader>
 
         {/* 轮播图 */}

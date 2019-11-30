@@ -2,7 +2,7 @@ import React from 'react'
 
 import PropTypes from 'prop-types'
 
-import { BASE_URL } from '../../../../utils/url'
+import { BASE_URL } from '../../utils/url'
 import styles from './index.module.css'
 
 const NoHouse = ({ children }) => (

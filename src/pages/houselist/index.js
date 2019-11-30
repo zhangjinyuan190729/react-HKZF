@@ -9,8 +9,8 @@ import {List,AutoSizer,WindowScroller,InfiniteLoader} from "react-virtualized"
 import styles from "./houselist.module.css"
 import { resolve } from 'dns'
 import Sticky from './components/Sticky'
-import NoHouse from './components/NoHouse'
-import {Toast} from "antd-mobile"
+import NoHouse from '../../components/NoHouse'
+import {Toast} from"antd-mobile"
 import {Spring} from "react-spring/renderprops"
 export default class Houselist extends React.Component{
     state = {
@@ -24,7 +24,7 @@ export default class Houselist extends React.Component{
     async componentDidMount(){
         let res = await getCurrentCity()
         this.setState({
-            cityname:res.label,
+            cityname: res.label,
             cityId:res.value
         },()=>{
             this.gethouselist()
